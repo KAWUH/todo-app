@@ -1,6 +1,5 @@
 use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
 use std::time::Duration;
-use std::error::Error;
 use tokio::time::sleep;
 
 pub async fn establish_connection(database_url: &str) -> Result<Pool<Postgres>, sqlx::Error> {
@@ -9,7 +8,7 @@ pub async fn establish_connection(database_url: &str) -> Result<Pool<Postgres>, 
 
     for retry_count in 0..=max_retries {
         match PgPoolOptions::new()
-            .max_connections(6)
+            .max_connections(15)
             .min_connections(2)
             .idle_timeout(Some(Duration::from_secs(60)))
             .acquire_timeout(Duration::from_secs(30))
@@ -23,7 +22,7 @@ pub async fn establish_connection(database_url: &str) -> Result<Pool<Postgres>, 
             },
             Err(e) => {
                 println!("Error connecting to database after {} attempts: {:?}", max_retries, e);
-                return Err(e.into());
+                return Err(e);
             }
         }
     }
